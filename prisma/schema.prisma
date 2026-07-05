@@ -1,0 +1,54 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  name String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages Message[]
+  workspaces WorkspaceUser[]
+}
+
+model Workspace {
+  id String @id @default(cuid())
+  name String
+  slug String @unique
+  createdAt DateTime @default(now())
+  users WorkspaceUser[]
+  channels Channel[]
+  messages Message[]
+}
+
+model WorkspaceUser {
+  id String @id @default(cuid())
+  userId String
+  workspaceId String
+  role String @default("member")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@unique([userId, workspaceId])
+}
+
+model Channel {
+  id String @id @default(cuid())
+  workspaceId String
+  name String
+  isPrivate Boolean @default(false)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  messages Message[]
+  @@unique([workspaceId, name])
+}
+
+model Message {
+  id String @id @default(cuid())
+  content String @db.Text
+  userId String
+  channelId String
+  workspaceId String
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
