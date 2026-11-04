@@ -2,7 +2,6 @@
 /.next
 /out
 /build
-.env
-.env.local
 .DS_Store
 *.pem
+config.bat
